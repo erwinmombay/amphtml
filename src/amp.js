@@ -33,6 +33,7 @@ import {adopt} from './runtime';
 import {cssText} from '../build/css.js';
 import {action} from './action';
 import {maybeValidate} from './validator-integration';
+import {experimentsFor} from './experiments';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -47,6 +48,7 @@ try {
     try {
       historyFor(window);
       viewerFor(window);
+      experimentsFor(window);
 
       installImg(window);
       installAd(window);
