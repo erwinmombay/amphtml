@@ -17,6 +17,9 @@
 
 /**
  * Experiments service provides information on which experiments are on or off.
+ * All experiments are opt-in. A user has to visit the experiments page and
+ * manually toggle the experiment on.
+ * TODO(dvoytenko): provide the URL for the experiments page once ready.
  * @private Visible for testing.
  */
 export class Experiments {
