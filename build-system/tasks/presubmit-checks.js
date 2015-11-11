@@ -156,7 +156,17 @@ var requiredTerms = {
 function matchTerms(file, terms) {
   var pathname = file.path;
   var contents = file.contents.toString();
+  var relative = file.relative;
+  // NOTE: (erwinm) temporary fix until we can get a better exclusion
+  // mechanism.
+  var excludedCookieCheck = [
+    'src/experiments.js',
+    'test/functional/test-experiments.js'
+  ];
   return Object.keys(terms).map(function(term) {
+    if (term == 'cookie\\W' && excludedCookieCheck.indexOf(relative) != -1) {
+      return false;
+   }
     var fix;
     // we can't optimize building the `RegExp` objects early unless we build
     // another mapping of term -> regexp object to be able to get back to the
@@ -167,7 +177,7 @@ function matchTerms(file, terms) {
 
     if (matches) {
       util.log(util.colors.red('Found forbidden: "' + matches[0] +
-          '" in ' + pathname));
+          '" in ' + relative));
       fix = terms[term];
 
       // log the possible fix information if provided for the term.
@@ -235,7 +245,7 @@ function isMissingTerms(file) {
     var matches = contents.match(new RegExp(term));
     if (!matches) {
       util.log(util.colors.red('Did not find required: "' + term +
-          '" in ' + file.path));
+          '" in ' + file.relative));
       util.log(util.colors.blue('=========='));
       return true;
     }
