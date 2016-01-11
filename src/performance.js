@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
+import {all} from './promise';
+import {documentStateFor} from './document-state';
 import {getService} from './service';
+import {resourcesFor} from './resources';
 import {timer} from './timer';
+import {viewerFor} from './viewer';
 
 
 /**
@@ -58,8 +62,70 @@ export class Performance {
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
+
+    /** @private {?Viewer} */
+    this.viewer_ = null;
+
+    /** @private {?Resources} */
+    this.resources = null;
+
+    /** @private {?DocumentState} */
+    this.docState_ = null;
   }
 
+  /**
+   * Listens to viewer and resource events.
+   */
+  coreServicesAvailable() {
+    this.viewer_ = viewerFor(this.win);
+    this.resources_ = resourcesFor(this.win);
+    this.docState_ = documentStateFor(this.win);
+
+    this.viewer_.onVisibilityChanged(this.flush.bind(this));
+
+    this.measureUserPerceivedVisualCompletenessTime_();
+  }
+
+  /**
+   * Measure the delay the user perceives of how long it takes
+   * to load the initial viewport.
+   * @private
+   */
+  measureUserPerceivedVisualCompletenessTime_() {
+    let didStartInPrerender = !this.viewer_.hasBeenVisible();
+    let docVisibleTime = didStartInPrerender ? -1 : timer.now();
+
+    // This is only relevant if the viewer is in prerender mode.
+    // (hasn't been visible yet, ever at this point)
+    if (didStartInPrerender) {
+      this.viewer_.whenFirstVisible().then(() => {
+        docVisibleTime = timer.now();
+      });
+    }
+
+    this.docState_.onReady(() => {
+      // We need to add a delay, since this can execute earlier
+      // than the machinery inside the `Resources` class finds any work
+      // to do.
+      // Another solution would be to make `getResourcesInViewport` async.
+      timer.delay(() => {
+        all(this.resources_.getResourcesInViewport().map((r) => {
+          return r.whenFirstLayoutComplete();
+        })).then(() => {
+          // If it didnt start in prerender, no need to calculate anything
+          // and we just need to tick `pc`. (it will give us the relative
+          // time since the viewer initialized the timer)
+          if (!didStartInPrerender) {
+            this.tick('pc');
+          } else {
+            const userPerceivedVisualCompletenesssTime = docVisibleTime > -1 ?
+                (timer.now() - docVisibleTime) : 0;
+            this.tick('pc', undefined, userPerceivedVisualCompletenesssTime);
+          }
+        });
+      }, 0);
+    });
+  }
 
   /**
    * Forwards tick events to the tick function set or queues it up to be
@@ -70,7 +136,6 @@ export class Performance {
    *    relative start for this tick.
    * @param {number=} opt_value The time to record the tick at. Optional, if
    *    not provided, use the current time.
-   * @export
    */
   tick(label, opt_from, opt_value) {
     if (this.tick_) {
@@ -83,7 +148,6 @@ export class Performance {
 
   /**
    * Calls the flush callback function set through setTickFunction.
-   * @export
    */
   flush() {
     if (this.flush_) {
@@ -144,7 +208,6 @@ export class Performance {
    *   also be provided to indicate when to record the tick at.
    * @param {function()=} opt_flush callback function that is called
    *   when we are ready for the ticks to be forwarded to an endpoint.
-   * @export
    */
   setTickFunction(tick, opt_flush) {
     this.tick_ = tick;
@@ -161,7 +224,6 @@ export class Performance {
 /**
  * @param {!Window} window
  * @return {!Performance}
- * @export
  */
 export function performanceFor(window) {
   return getService(window, 'performance', () => {

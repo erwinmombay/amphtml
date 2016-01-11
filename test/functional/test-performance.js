@@ -17,27 +17,23 @@
 import * as sinon from 'sinon';
 import {Performance, performanceFor} from '../../src/performance';
 import {adopt} from '../../src/runtime';
+import {viewerFor} from '../../src/viewer';
+import {resourcesFor} from '../../src/resources';
 
 
 describe('performance', () => {
   let sandbox;
-  let windowMock;
   let perf;
-  let windowApi;
   let clock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    const WindowApi = function() {};
-    windowApi = new WindowApi();
-    windowMock = sandbox.mock(windowApi);
-    perf = new Performance(windowMock);
+    perf = new Performance(window);
   });
 
   afterEach(() => {
     perf = null;
-    windowAPi = null;
     clock.restore();
     clock = null;
     sandbox.restore();
@@ -234,5 +230,106 @@ describe('performance', () => {
     window.AMP.setTickFunction(function() {}, flushSpy);
 
     expect(flushSpy.calledOnce).to.be.true;
+  });
+
+  describe('coreServicesAvailable', () => {
+    let tickSpy;
+    let viewer;
+    let resources;
+    let whenFirstVisibleStub;
+    let whenFirstViewportLoadedStub;
+    let hasBeenVisibleStub;
+    let whenFirstVisiblePromise;
+    let whenFirstVisibleResolve;
+    let whenFirstViewportLoadedPromise;
+    let whenFirstViewportLoadedResolve;
+
+    function stubHasBeenVisible(visibility) {
+      hasBeenVisibleStub = sinon.stub(viewer, 'hasBeenVisible')
+          .returns(visibility);
+    }
+
+    beforeEach(() => {
+      viewer = viewerFor(window);
+      resources = resourcesFor(window);
+
+      tickSpy = sinon.spy(perf, 'tick');
+
+      whenFirstVisiblePromise = new Promise(resolve => {
+        whenFirstVisibleResolve = resolve;
+      });
+
+      whenFirstViewportLoadedPromise = new Promise(resolve => {
+        whenFirstViewportLoadedResolve = resolve;
+      });
+
+      whenFirstVisibleStub = sinon.stub(viewer, 'whenFirstVisible')
+          .returns(whenFirstVisiblePromise);
+      whenFirstViewportLoadedStub = sinon
+          .stub(resources, 'whenFirstViewportLoaded')
+          .returns(whenFirstViewportLoadedPromise);
+    });
+
+    afterEach(() => {
+      whenFirstVisibleStub.restore();
+      whenFirstViewportLoadedStub.restore();
+      if (hasBeenVisibleStub) {
+        hasBeenVisibleStub.restore();
+      }
+    });
+
+    describe('if document is in prerender', () => {
+
+      beforeEach(() => {
+        clock.tick(100);
+        stubHasBeenVisible(false);
+        perf.coreServicesAvailable();
+      });
+
+      it('should tick `pc` with opt_value=400 when user request document ' +
+         'to be visible before before first viewport completion', () => {
+        clock.tick(100);
+        whenFirstVisibleResolve();
+        return viewer.whenFirstVisible().then(() => {
+          clock.tick(400);
+          whenFirstViewportLoadedResolve();
+          return resources.whenFirstViewportLoaded().then(() => {
+            expect(tickSpy.callCount).to.equal(1);
+            expect(tickSpy.firstCall.args[0]).to.equal('pc');
+            expect(Number(tickSpy.firstCall.args[2])).to.equal(400);;
+          });
+        });
+      });
+
+      it('should tick `pc` with `opt_value=0` when viewport is complete ' +
+         'before user request document to be visible', () => {
+        clock.tick(300);
+        whenFirstViewportLoadedResolve();
+        return resources.whenFirstViewportLoaded().then(() => {
+          expect(tickSpy.callCount).to.equal(1);
+          expect(tickSpy.firstCall.args[0]).to.equal('pc');
+          expect(tickSpy.firstCall.args[2]).to.equal(0);
+        });
+      });
+    });
+
+    describe('if document is not in prerender', () => {
+
+      beforeEach(() => {
+        stubHasBeenVisible(true);
+        perf.coreServicesAvailable();
+      });
+
+      it('should `pc` with `opt_value=300` when user requests document ' +
+         'to be visible', () => {
+        clock.tick(300);
+        whenFirstViewportLoadedResolve();
+        return resources.whenFirstViewportLoaded().then(() => {
+          expect(tickSpy.callCount).to.equal(1);
+          expect(tickSpy.firstCall.args[0]).to.equal('pc');
+          expect(tickSpy.firstCall.args[2]).to.equal(300);
+        });
+      });
+    });
   });
 });

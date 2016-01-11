@@ -124,6 +124,23 @@ export class Resources {
     /** @const {!TaskQueue_} */
     this.queue_ = new TaskQueue_();
 
+    /** @private {boolean} */
+    this.whenFirstViewportLoaded_ = false;
+
+    /** @private {?function(*)} */
+    this.whenFirstViewportLoadedResolve_ = null;
+
+    /** @private @const {!Promise} */
+    this.whenFirstViewportLoadedPromise_ = new Promise(resolve => {
+      this.whenFirstViewportLoadedResolve_ = resolve;
+    });
+
+    /** @private @const {!Array<!Resource>} */
+    this.firstViewportElements_ = [];
+
+    /** @private {boolean} */
+    this.shouldFindFirstViewportElements_ = true;
+
    /**
     * The internal structure of a ChangeHeightRequest.
     * @typedef {{
@@ -279,6 +296,14 @@ export class Resources {
   getResourceForElement(element) {
     return assert(/** @type {!Resource} */ (element[RESOURCE_PROP_]),
         'Missing resource prop on %s', element);
+  }
+
+  /**
+   * Returns a promise that is resolved when the first resource is laid out.
+   * @return {!Promise}
+   */
+  whenFirstViewportLoaded() {
+    return this.whenFirstViewportLoadedPromise_;
   }
 
   /**
@@ -805,7 +830,7 @@ export class Resources {
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.getState() == ResourceState_.NOT_BUILT || r.hasOwner()) {
+        if (r.hasOwner()) {
           continue;
         }
         if (relayoutAll ||
@@ -874,6 +899,21 @@ export class Resources {
       if (r.isInViewport() != shouldBeInViewport) {
         r.setInViewport(shouldBeInViewport);
       }
+    }
+
+    // collect resources that are in the first viewport
+    // for instrumentation.
+    if (this.shouldFindFirstViewportElements_) {
+      for (let i = 0; i < this.resources_.length; i++) {
+        const r = this.resources_[i];
+        if (r.hasOwner()) {
+          continue;
+        }
+        if (r.isDisplayed() && r.overlaps(viewportRect)) {
+          this.firstViewportElements_.push(r);
+        }
+      }
+      this.shouldFindFirstViewportElements_ = this.firstPassAfterDocumentReady_;
     }
 
     // Phase 5: Idle layout: layout more if we are otherwise not doing much.
@@ -1068,6 +1108,7 @@ export class Resources {
   taskComplete_(task, success, opt_reason) {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
+    this.checkForFirstViewportElementsWhenTaskDone_(task);
     if (!success) {
       log.error(TAG_, 'task failed:',
           task.id, task.resource.debugid, opt_reason);
@@ -1272,6 +1313,23 @@ export class Resources {
       }
     }
   }
+
+  /**
+   * Removes the task resource from the discovered first viewport
+   * resources array.
+   * @param {!TaskDef} task
+   */
+  checkForFirstViewportElementsWhenTaskDone_(task) {
+    if (this.firstViewportElements_.length > 0) {
+      const index = this.firstViewportElements_.indexOf(task.resource);
+      if (index != -1) {
+        this.firstViewportElements_.splice(index, 1);
+      }
+      if (this.firstViewportElements_.length == 0) {
+        this.whenFirstViewportLoadedResolve_();
+      }
+    }
+  }
 }
 
 
@@ -1414,8 +1472,21 @@ export class Resource {
     if (!built) {
       return false;
     }
-    this.state_ = ResourceState_.NOT_LAID_OUT;
+
+    if (this.hasBeenMeasured()) {
+      this.state_ = ResourceState_.READY_FOR_LAYOUT;
+    } else {
+      this.state_ = ResourceState_.NOT_LAID_OUT;
+    }
     return true;
+  }
+
+  /**
+   * Checks if the current resource has been laid out.
+   * @return {boolean}
+   */
+  hasBeenMeasured() {
+    return this.layoutBox_.top != -10000;
   }
 
   /**
@@ -1468,23 +1539,21 @@ export class Resource {
 
   /**
    * Measures the resource's boundaries. Only allowed for upgraded elements.
+   * @param {boolean} opt_forceMeasure
    */
   measure() {
-    assert(this.element.isUpgraded(), 'Must be upgraded to measure: %s',
-        this.debugid);
     this.isMeasureRequested_ = false;
-    if (this.state_ == ResourceState_.NOT_BUILT) {
-      // Can't measure unbuilt element.
-      return;
-    }
     const box = this.resources_.viewport_.getLayoutRect(this.element);
     // Note that "left" doesn't affect readiness for the layout.
     if (this.state_ == ResourceState_.NOT_LAID_OUT ||
           this.layoutBox_.top != box.top ||
           this.layoutBox_.width != box.width ||
           this.layoutBox_.height != box.height) {
-      if (this.state_ == ResourceState_.NOT_LAID_OUT ||
-              this.element.isRelayoutNeeded()) {
+
+      if (this.element.isUpgraded() &&
+              this.state_ != ResourceState_.NOT_BUILT &&
+              (this.state_ == ResourceState_.NOT_LAID_OUT ||
+                  this.element.isRelayoutNeeded())) {
         this.state_ = ResourceState_.READY_FOR_LAYOUT;
       }
     }
