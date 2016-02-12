@@ -40,7 +40,7 @@ describe('amp-brightcove', () => {
     });
   }
 
-  it('renders', () => {
+  it.skip('renders', () => {
     return getBrightcove('906043040001','ref:ampdemo').then(bc => {
       const iframe = bc.querySelector('iframe');
       expect(iframe).to.not.be.null;
