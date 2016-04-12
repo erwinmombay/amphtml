@@ -119,6 +119,7 @@ export function stubElements(win) {
     if (knownElements[name]) {
       continue;
     }
+    console.log('element stub for', name);
     registerElement(win, name, ElementStub);
   }
   // Repeat stubbing when HEAD is complete.

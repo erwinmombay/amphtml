@@ -19,7 +19,6 @@ import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {performanceFor} from './performance';
 import {templatesFor} from './template';
 import {installCoreServices} from './amp-core-service';
-import {installAd} from '../builtins/amp-ad';
 import {installGlobalClickListener} from './document-click';
 import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
@@ -49,10 +48,9 @@ try {
       templatesFor(window);
 
       installImg(window);
-      installAd(window);
       installPixel(window);
       installVideo(window);
-      installEmbed(window);
+      //installEmbed(window);
 
       adopt(window);
       stubElements(window);
