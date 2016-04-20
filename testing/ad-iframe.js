@@ -32,7 +32,6 @@ import {markElementScheduledForTesting} from '../src/custom-element';
  * - errors: Array of console.error fired during page load.
  *
  * @param {string} name Type of element to create.
- * @param {function(!Window)} installer Function to install ad.
  * @param {!Object} attributes Attributes to add to the element.
  * @param {?string} canonical Rel, href link for element.
  * @param {function(!Element)=} opt_handleElement Called just before adding
@@ -41,13 +40,12 @@ import {markElementScheduledForTesting} from '../src/custom-element';
  *       other JS executes in the window.
  * @return {!Promise}
  */
-export function createAdPromise(name, installer, attributes, canonical,
+export function createAdPromise(name, attributes, canonical,
                                 opt_handleElement, opt_beforeLayoutCallback) {
   return createIframePromise(undefined, opt_beforeLayoutCallback)
     .then(iframe => {
       iframe.iframe.style.height = '400px';
       iframe.iframe.style.width = '400px';
-      installer(iframe.win);
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
       if (canonical) {
         const link = iframe.doc.createElement('link');
