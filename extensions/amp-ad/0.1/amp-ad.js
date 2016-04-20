@@ -56,7 +56,6 @@ class AmpAd extends AMP.BaseElement {
     // at closer than 1.25 viewports away.
     // TODO(jridgewell): Can this be moved to the new number based
     // renderOutsideViewport?
-    debugger
     if (this.element.getAttribute('data-loading-strategy') ==
         'prefer-viewability-over-views') {
       const box = this.getIntersectionElementLayoutBox();

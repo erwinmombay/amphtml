@@ -48,6 +48,7 @@ function tests(name) {
     });
 
     it('render an ad', () => {
+      let clock;
       return getAd({
         width: 300,
         height: 250,
@@ -58,7 +59,9 @@ function tests(name) {
         'data-aax_src': '302',
         // Test precedence
         'data-width': '6666',
-      }, 'https://schema.org').then(ad => {
+      }, 'https://schema.org', undefined, () => {
+        clock = sandbox.useFakeTimers();
+      }).then(ad => {
         const iframe = ad.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -77,25 +80,24 @@ function tests(name) {
         expect(data._context.canonicalUrl).to.equal('https://schema.org/');
         expect(data.aax_size).to.equal('300x250');
 
-        describe('ad preconnect', () => {
-          const doc = iframe.ownerDocument;
-          const fetches = doc.querySelectorAll(
-              'link[rel=prefetch]');
-          expect(fetches).to.have.length(3);
-          expect(fetches[0].href).to.equal(
-              'http://ads.localhost:' + location.port +
-              '/dist.3p/current/frame.max.html');
-          expect(fetches[1].href).to.equal(
-              'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
-          expect(fetches[2].href).to.equal(
-              'https://c.amazon-adsystem.com/aax2/assoc.js');
-          const preconnects = doc.querySelectorAll(
-              'link[rel=preconnect]');
-          expect(preconnects[preconnects.length - 1].href).to.equal(
-              'https://testsrc/');
-          // Make sure we run tests without CID available by default.
-          expect(ad.ownerDocument.defaultView.services.cid).to.be.undefined;
-        });
+        const doc = iframe.ownerDocument;
+        const fetches = doc.querySelectorAll(
+            'link[rel=prefetch]');
+        expect(fetches).to.have.length(3);
+        expect(fetches[0].href).to.equal(
+            'http://ads.localhost:' + location.port +
+            '/dist.3p/current/frame.max.html');
+        expect(fetches[1].href).to.equal(
+            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+        expect(fetches[2].href).to.equal(
+            'https://c.amazon-adsystem.com/aax2/assoc.js');
+        const preconnects = doc.querySelectorAll(
+            'link[rel=preconnect]');
+        expect(preconnects[preconnects.length - 1].href).to.equal(
+            'https://testsrc/');
+        // Make sure we run tests without CID available by default.
+        expect(ad.ownerDocument.defaultView.services.cid).to.be.undefined;
+        clock.tick(1000);
       });
     });
 
@@ -423,7 +425,6 @@ function tests(name) {
       it('should not return false after scrolling, then false for 1s', () => {
         let clock;
         return getGoodAd(ad => {
-          debugger;
           expect(ad.renderOutsideViewport()).not.to.be.false;
         }, () => {
           clock = sandbox.useFakeTimers();

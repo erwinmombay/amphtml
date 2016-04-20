@@ -94,10 +94,6 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
     const element = stub.element;
-    console.log("Element in adEmbed is ", element);
-    console.log("In upgradeOrRegisterElement element tag is ", element.tagName);
-    console.log("Upgrade to class ", toClass);
-    console.log("Request to register name is ", name);
     if (element.tagName.toLowerCase() == name) {
       try {
         element.upgrade(toClass);
@@ -1168,9 +1164,6 @@ export function createAmpElementProto(win, name, implementationClass) {
  * @param {function(new:BaseElement, !Element)} implementationClass
  */
 export function registerElement(win, name, implementationClass) {
-  console.log("In registerElement");
-  console.log("register element's name is ", name);
-  console.log("implementationClass's name is ", implementationClass);
   knownElements[name] = implementationClass;
   win.document.registerElement(name, {
       prototype: createAmpElementProto(win, name, implementationClass),
