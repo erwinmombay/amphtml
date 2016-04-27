@@ -25,7 +25,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   @Override protected CompilerOptions createOptions() {
     CompilerOptions options = super.createOptions();
     options.setCollapseProperties(true);
-    AmpPass ampPass = new AmpPass(getCompiler(), suffixTypes);
+    AmpPass ampPass = new AmpPass(getCompiler(), suffixTypes, true);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     return options;
   }

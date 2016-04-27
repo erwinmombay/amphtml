@@ -1,4 +1,3 @@
-
 package org.ampproject;
 
 
@@ -17,7 +16,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
       "dev.fine");
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, suffixTypes);
+    return new AmpPass(compiler, suffixTypes, false);
   }
 
   @Override protected int getNumRepetitions() {
@@ -115,7 +114,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
 
   public void testShouldPreserveNoneCalls() throws Exception {
     test(
-        // Does reliasing
+        // Does re-aliasing
         LINE_JOINER.join(
              "(function() {",
              "  var log = { dev: { assert: function() {} } };",

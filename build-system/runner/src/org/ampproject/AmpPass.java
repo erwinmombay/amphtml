@@ -6,6 +6,7 @@ import com.google.javascript.jscomp.AbstractCompiler;
 import com.google.javascript.jscomp.HotSwapCompilerPass;
 import com.google.javascript.jscomp.NodeTraversal;
 import com.google.javascript.jscomp.NodeTraversal.AbstractPostOrderCallback;
+import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
 
 /**
@@ -25,11 +26,13 @@ import com.google.javascript.rhino.Node;
 class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   final AbstractCompiler compiler;
+  final boolean addNodeEnv;
   private final Set<String> stripTypeSuffixes;
 
-  public AmpPass(AbstractCompiler compiler, Set<String> stripTypeSuffixes) {
+  public AmpPass(AbstractCompiler compiler, Set<String> stripTypeSuffixes, boolean addNodeEnv) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
+    this.addNodeEnv = addNodeEnv;
   }
 
   @Override public void process(Node externs, Node root) {
@@ -38,6 +41,9 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   @Override public void hotSwapScript(Node scriptRoot, Node originalRoot) {
     NodeTraversal.traverseEs6(compiler, scriptRoot, this);
+    if (addNodeEnv) {
+      prependNodeEnv(scriptRoot);
+    }
   }
 
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
@@ -132,5 +138,13 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
       }
     }
     return false;
+  }
+  
+  private void prependNodeEnv(Node scriptRoot) {
+    Node process = IR.objectlit(IR.stringKey("env", IR.objectlit(
+        IR.stringKey("NODE_ENV", IR.string("production")))));
+    Node var = IR.var(IR.name("process"), process);
+    scriptRoot.getFirstChild().addChildToFront(var);
+    compiler.reportCodeChange();
   }
 }
