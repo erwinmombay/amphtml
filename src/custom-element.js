@@ -1322,6 +1322,14 @@ function createBaseAmpElementProto(win) {
     }
   };
 
+
+  /**
+   * @return {?Element}
+   */
+  ElementProto.toThumbnail = function() {
+    return this.implementation_.toThumbnail();
+  };
+
   return ElementProto;
 }
 
