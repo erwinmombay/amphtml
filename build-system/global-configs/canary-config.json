@@ -1,6 +1,5 @@
 {
   "allow-doc-opt-in": ["visibility-v2"],
-
   "canary": 1,
   "amp-ios-overflow-x": 1,
   "amp-experiment": 1,
@@ -20,5 +19,5 @@
   "amp-accordion-session-state-optout": 1,
   "amp-playbuzz": 1,
   "amp-selector": 1,
-  "sentinel-name-change": 1,
+  "sentinel-name-change": 1
 }
