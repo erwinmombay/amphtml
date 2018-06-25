@@ -85,6 +85,7 @@ export const ampGeoPresets = {
     'VA', // Vatican City
     'WF', // Wallis & Futuna Islands
     'EZ', // Eurozone
+    'EW', // Erwinzone
     'CH', // Switzerland
     /** END Machine Generated */
   ],
