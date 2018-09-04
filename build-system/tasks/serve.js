@@ -59,6 +59,7 @@ function serve() {
       'SERVE_QUIET': quiet,
       'SERVE_CACHING_HEADERS': sendCachingHeaders,
       'SERVE_EXTENSIONS_WITHOUT_CACHING': noCachingExtensions,
+      'SINGLE_PASS': argv.single_pass,
     },
     stdout: !quiet,
   };
