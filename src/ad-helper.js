@@ -18,6 +18,7 @@ import {computedStyle} from './style';
 import {dev} from './log';
 import {getParentWindowFrameElement} from './service';
 
+console.log('wah')
 const AD_CONTAINER_PROP = '__AMP__AD_CONTAINER';
 
 /**
