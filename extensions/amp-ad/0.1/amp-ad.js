@@ -21,7 +21,7 @@ import {adConfig} from '../../../ads/_config';
 import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {hasOwn} from '../../../src/utils/object';
 import {userAssert} from '../../../src/log';
-
+//test
 
 /**
  * Construct ad network type-specific tag and script name.  Note that this
