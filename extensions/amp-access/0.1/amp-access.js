@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+// hello world
 import {AccessSource, AccessType} from './amp-access-source';
 import {AccessVars} from './access-vars';
 import {AmpEvents} from '../../../src/amp-events';
