@@ -130,6 +130,7 @@ VideoAnalyticsDetailsDef.prototype.state;
 VideoAnalyticsDetailsDef.prototype.width;
 
 
+
 // Node.js global
 var process = {};
 process.env;
