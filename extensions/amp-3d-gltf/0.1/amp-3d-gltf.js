@@ -33,6 +33,7 @@ const isWebGLSupported = () => {
   return gl && gl instanceof WebGLRenderingContext;
 };
 
+console.log('hello');
 export class Amp3dGltf extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
