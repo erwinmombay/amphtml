@@ -31,7 +31,7 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'visual-diff-tests.js';
 
-const esmFlag = argv.esm ? ' --esm' : '';
+const esmFlag = argv.type === 'module' ? ' --esm' : '';
 
 /**
  * @return {void}

@@ -184,8 +184,9 @@ async function launchPercyAgent() {
 async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
+    // eslint-disable-next-line google-camelcase/google-camelcase
     {quiet: !argv.webserver_debug, new_server: argv.esm},
-    {compiled: true, esm: argv.esm},
+    {compiled: true, esm: argv.esm}
   );
 }
 
