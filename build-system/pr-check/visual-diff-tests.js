@@ -19,6 +19,7 @@
  * @fileoverview Script that runs the visual diff tests during CI.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const {
   downloadNomoduleOutput,
@@ -28,7 +29,9 @@ const {
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
 
-const jobName = 'nomodule-visual-diff-tests.js';
+const jobName = 'visual-diff-tests.js';
+
+const esmFlag = argv.esm ? ' --esm' : '';
 
 /**
  * @return {void}
@@ -37,7 +40,7 @@ function pushBuildWorkflow() {
   downloadNomoduleOutput();
   timedExecOrDie('gulp update-packages');
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-  timedExecOrDie('gulp visual-diff --nobuild --master');
+  timedExecOrDie(`gulp visual-diff --nobuild --master${esmFlag}`);
 }
 
 /**
@@ -48,9 +51,9 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp visual-diff --nobuild');
+    timedExecOrDie(`gulp visual-diff --nobuild${esmFlag}`);
   } else {
-    timedExecOrDie('gulp visual-diff --empty');
+    timedExecOrDie(`gulp visual-diff --empty${esmFlag}`);
     printSkipMessage(
       jobName,
       'this PR does not affect the runtime or visual diff tests'

@@ -136,7 +136,7 @@ jobs:
       - install_chrome
       - run:
           name: 'Module Visual Diff Tests'
-          command: node build-system/pr-check/visual-diff-tests.js
+          command: node build-system/pr-check/visual-diff-tests.js --esm
       - fail_fast
   'Unit Tests':
     executor:
@@ -256,10 +256,14 @@ workflows:
             - 'Module Build'
       - 'Validator Tests':
           <<: *push_and_pr_builds
-      - 'Visual Diff Tests':
+      - 'Nomodule Visual Diff Tests':
           <<: *push_and_pr_builds
           requires:
             - 'Nomodule Build'
+      - 'Module Visual Diff Tests':
+          <<: *push_and_pr_builds
+          requires:
+            - 'Module Build'
       - 'Unit Tests':
           <<: *push_and_pr_builds
       - 'Unminified Tests':
