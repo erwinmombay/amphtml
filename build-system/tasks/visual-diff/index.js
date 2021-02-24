@@ -184,8 +184,8 @@ async function launchPercyAgent() {
 async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
-    {quiet: !argv.webserver_debug},
-    {compiled: true}
+    {quiet: !argv.webserver_debug, new_server: argv.esm},
+    {compiled: true, esm: argv.esm},
   );
 }
 
@@ -869,6 +869,7 @@ visualDiff.flags = {
   'webserver_debug': '  Prints debug info from the local gulp webserver',
   'percy_agent_debug': '  Prints debug info from the @percy/agent instance',
   'debug': '  Sets all debugging flags',
+  'esm': '  Serve ESM JS',
   'verbose': '  Prints verbose log statements',
   'grep': '  Runs tests that match the pattern',
   'percy_token': '  Override the PERCY_TOKEN environment variable',

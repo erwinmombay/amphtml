@@ -21,36 +21,30 @@
 
 const atob = require('atob');
 const {
-  downloadNomoduleOutput,
+  downloadModuleOutput,
   printSkipMessage,
   timedExecOrDie,
 } = require('./utils');
 const {buildTargetsInclude, Targets} = require('./build-targets');
 const {runCiJob} = require('./ci-job');
 
-const jobName = 'nomodule-visual-diff-tests.js';
+const jobName = 'module-visual-diff-tests.js';
 
-/**
- * @return {void}
- */
 function pushBuildWorkflow() {
-  downloadNomoduleOutput();
+  downloadModuleOutput();
   timedExecOrDie('gulp update-packages');
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-  timedExecOrDie('gulp visual-diff --nobuild --master');
+  timedExecOrDie('gulp visual-diff --nobuild --master --esm');
 }
 
-/**
- * @return {void}
- */
 function prBuildWorkflow() {
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
-    downloadNomoduleOutput();
+    downloadModuleOutput();
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp visual-diff --nobuild');
+    timedExecOrDie('gulp visual-diff --nobuild --esm');
   } else {
-    timedExecOrDie('gulp visual-diff --empty');
+    timedExecOrDie('gulp visual-diff --empty --esm');
     printSkipMessage(
       jobName,
       'this PR does not affect the runtime or visual diff tests'

@@ -118,14 +118,24 @@ jobs:
           name: 'Validator Tests'
           command: node build-system/pr-check/validator-tests.js
       - fail_fast
-  'Visual Diff Tests':
+  'Nomodule Visual Diff Tests':
     executor:
       name: amphtml-large-executor
     steps:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Visual Diff Tests'
+          name: 'Nomodule Visual Diff Tests'
+          command: node build-system/pr-check/visual-diff-tests.js
+      - fail_fast
+  'Module Visual Diff Tests':
+    executor:
+      name: amphtml-large-executor
+    steps:
+      - setup_vm
+      - install_chrome
+      - run:
+          name: 'Module Visual Diff Tests'
           command: node build-system/pr-check/visual-diff-tests.js
       - fail_fast
   'Unit Tests':

@@ -46,6 +46,38 @@ const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 const HOST = argv.host || '0.0.0.0';
 const PORT = argv.port || 8000;
 
+/**
+ * @typedef {{
+ *   name: string?,
+ *   root: string?,
+ *   host: string?,
+ *   port: number?,
+ *   https: boolean?,
+ *   preferHttp1: boolean?,
+ *   silent: boolean?
+ * }}
+ */
+const ConnectOptionsDef = {};
+
+/**
+ * @typedef {{
+ *   lazyBuild: boolean,
+ *   quiet: boolean,
+ *   new_server: boolean
+ * }}
+ */
+const ServerOptionsDef = {};
+
+/**
+ * @typedef {{
+ *   compiled: boolean,
+ *   esm: boolean,
+ *   cdn: boolean,
+ *   rtv: string?
+ * }}
+ */
+const ModeOptionsDef = {};
+
 // Used for logging.
 let url = null;
 let quiet = !!argv.quiet;
@@ -81,9 +113,9 @@ function getMiddleware() {
 /**
  * Launches a server and waits for it to fully start up
  *
- * @param {?Object} connectOptions
- * @param {?Object} serverOptions
- * @param {?Object} modeOptions
+ * @param {?ConnectOptionsDef} connectOptions
+ * @param {?ServerOptionsDef} serverOptions
+ * @param {?ModeOptionsDef} modeOptions
  */
 async function startServer(
   connectOptions = {},
@@ -166,8 +198,9 @@ async function stopServer() {
 
 /**
  * Closes the existing server and restarts it
+ * @param {?serverOptionsDef} serverOptions
  */
-async function restartServer() {
+async function restartServer(serverOptions = {}) {
   stopServer();
   try {
     buildNewServer();
@@ -176,7 +209,7 @@ async function restartServer() {
     return;
   }
   resetServerFiles();
-  startServer();
+  startServer({}, connectOptions);
 }
 
 /**
@@ -196,9 +229,9 @@ async function serve() {
 
 /**
  * Starts a webserver at the repository root to serve built files.
- * @param {boolean=} lazyBuild
+ * @param {?ServerOptionsDef} serverOptions
  */
-async function doServe(lazyBuild = false) {
+async function doServe(serverOptions = {}) {
   createCtrlcHandler('serve');
   const watchFunc = async () => {
     await restartServer();
