@@ -198,7 +198,7 @@ async function stopServer() {
 
 /**
  * Closes the existing server and restarts it
- * @param {?serverOptionsDef} serverOptions
+ * @param {ServerOptionsDef=} serverOptions
  */
 async function restartServer(serverOptions = {}) {
   stopServer();
@@ -229,7 +229,7 @@ async function serve() {
 
 /**
  * Starts a webserver at the repository root to serve built files.
- * @param {?ServerOptionsDef} serverOptions
+ * @param {ServerOptionsDef=} serverOptions
  */
 async function doServe(serverOptions = {}) {
   createCtrlcHandler('serve');

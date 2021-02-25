@@ -389,6 +389,7 @@ async function generateSnapshots(webpages) {
   // no interactions, and each test that has in interactive tests file should
   // load those tests here.
   for (const webpage of webpages) {
+    webpage.name += argv.esm ? ' (Module)' : ' (Nomodule)';
     webpage.tests_ = {};
     if (!webpage.no_base_test) {
       webpage.tests_[''] = async () => {};

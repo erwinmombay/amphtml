@@ -125,14 +125,9 @@ jobs:
       - setup_vm
       - install_chrome
       - run:
-          name: 'Visual Diff Tests (using << parameters.build_type >> build)'
-          command: node build-system/pr-check/visual-diff-tests.js --type << parameters.build_type >>
+          name: 'Visual Diff Tests'
+          command: node build-system/pr-check/visual-diff-tests.js
       - fail_fast
-    parameters:
-      build_type:
-        description: 'Which build type to use'
-        type: string
-        enum: ['module', 'nomodule']
   'Unit Tests':
     executor:
       name: amphtml-large-executor
@@ -252,13 +247,11 @@ workflows:
       - 'Validator Tests':
           <<: *push_and_pr_builds
       - 'Visual Diff Tests':
-          name: 'Visual Diff Tests (<< matrix.build_type >>)'
-          matrix:
-            parameters:
-              build_type: ['module', 'nomodule']
-          <<: *push_and_pr_builds
+          name: 'Visual Diff Tests'
           requires:
+            - 'Module Build'
             - 'Nomodule Build'
+          <<: *push_and_pr_builds
       - 'Unit Tests':
           <<: *push_and_pr_builds
       - 'Unminified Tests':

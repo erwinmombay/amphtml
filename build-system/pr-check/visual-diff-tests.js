@@ -19,7 +19,6 @@
  * @fileoverview Script that runs the visual diff tests during CI.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const {
   downloadNomoduleOutput,
@@ -31,10 +30,7 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'visual-diff-tests.js';
 
-let baseCommand = 'gulp visual-diff';
-if (argv.type === 'module') {
-  baseCommand += ' --esm';
-}
+const baseCommand = 'gulp visual-diff';
 
 /**
  * @return {void}
@@ -43,7 +39,7 @@ function pushBuildWorkflow() {
   downloadNomoduleOutput();
   timedExecOrDie('gulp update-packages');
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-  timedExecOrDie(`gulp visual-diff --nobuild --master${esmFlag}`);
+  timedExecOrDie(`${baseCommand} --nobuild --master`);
 }
 
 /**
@@ -54,9 +50,11 @@ function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie(`gulp visual-diff --nobuild${esmFlag}`);
+    timedExecOrDie(`${baseCommand} --nobuild --esm`);
+    timedExecOrDie(`${baseCommand} --nobuild`);
   } else {
-    timedExecOrDie(`gulp visual-diff --empty${esmFlag}`);
+    timedExecOrDie(`${baseCommand} --empty --esm`);
+    timedExecOrDie(`${baseCommand} --empty`);
     printSkipMessage(
       jobName,
       'this PR does not affect the runtime or visual diff tests'
