@@ -247,11 +247,10 @@ workflows:
       - 'Validator Tests':
           <<: *push_and_pr_builds
       - 'Visual Diff Tests':
-          name: 'Visual Diff Tests'
+          <<: *push_and_pr_builds
           requires:
             - 'Module Build'
             - 'Nomodule Build'
-          <<: *push_and_pr_builds
       - 'Unit Tests':
           <<: *push_and_pr_builds
       - 'Unminified Tests':

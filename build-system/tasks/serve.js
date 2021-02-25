@@ -224,17 +224,18 @@ async function performPreBuildSteps() {
  * Entry point of the `gulp serve` task.
  */
 async function serve() {
-  await doServe();
+  await doServe({}, {esm: argv.esm});
 }
 
 /**
  * Starts a webserver at the repository root to serve built files.
  * @param {ServerOptionsDef=} serverOptions
+ * @param {ModeOptionsDef=} modeOptions
  */
-async function doServe(serverOptions = {}) {
+async function doServe(serverOptions = {}, modeOptions = {}) {
   createCtrlcHandler('serve');
   const watchFunc = async () => {
-    await restartServer();
+    await restartServer(serverOptions, modeOptions);
   };
   watch(serverFiles).on('change', debounce(watchFunc, watchDebounceDelay));
   await startServer({}, {lazyBuild}, {});

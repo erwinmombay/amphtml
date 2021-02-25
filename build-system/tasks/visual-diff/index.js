@@ -871,7 +871,7 @@ visualDiff.flags = {
   'webserver_debug': '  Prints debug info from the local gulp webserver',
   'percy_agent_debug': '  Prints debug info from the @percy/agent instance',
   'debug': '  Sets all debugging flags',
-  'esm': '  Serve ESM JS',
+  'esm': '  Run visual diff tests against the module build',
   'verbose': '  Prints verbose log statements',
   'grep': '  Runs tests that match the pattern',
   'percy_token': '  Override the PERCY_TOKEN environment variable',
