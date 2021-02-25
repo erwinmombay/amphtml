@@ -31,7 +31,10 @@ const {runCiJob} = require('./ci-job');
 
 const jobName = 'visual-diff-tests.js';
 
-const esmFlag = argv.type === 'module' ? ' --esm' : '';
+let baseCommand = 'gulp visual-diff';
+if (argv.type === 'module') {
+  baseCommand += ' --esm';
+}
 
 /**
  * @return {void}
