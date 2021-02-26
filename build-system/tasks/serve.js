@@ -63,7 +63,6 @@ const ConnectOptionsDef = {};
  * @typedef {{
  *   lazyBuild: boolean,
  *   quiet: boolean,
- *   new_server: boolean
  * }}
  */
 const ServerOptionsDef = {};
