@@ -199,8 +199,9 @@ async function stopServer() {
 /**
  * Closes the existing server and restarts it
  * @param {ServerOptionsDef=} serverOptions
+ * @param {ModeOptionsDef=} modeOptions
  */
-async function restartServer(serverOptions = {}) {
+async function restartServer(serverOptions = {}, modeOptions = {}) {
   stopServer();
   try {
     buildNewServer();
@@ -209,7 +210,7 @@ async function restartServer(serverOptions = {}) {
     return;
   }
   resetServerFiles();
-  startServer({}, serverOptions);
+  startServer({}, serverOptions, modeOptions);
 }
 
 /**
