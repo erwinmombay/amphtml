@@ -229,8 +229,8 @@ async function serve() {
 
 /**
  * Starts a webserver at the repository root to serve built files.
- * @param {ServerOptionsDef=} serverOptions
- * @param {ModeOptionsDef=} modeOptions
+ * @param {?ServerOptionsDef} serverOptions
+ * @param {?ModeOptionsDef} modeOptions
  */
 async function doServe(serverOptions = {}, modeOptions = {}) {
   createCtrlcHandler('serve');
