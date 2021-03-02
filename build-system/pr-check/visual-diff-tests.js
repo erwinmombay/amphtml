@@ -44,7 +44,6 @@ function pushBuildWorkflow() {
   downloadNomoduleOutput();
   timedExecOrDie('gulp update-packages');
   process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-  timedExecOrDie(`gulp visual-diff --nobuild --master --esm`);
   timedExecOrDie(`gulp visual-diff --nobuild --master`);
 }
 
@@ -57,10 +56,8 @@ function prBuildWorkflow() {
     downloadModuleOutput();
     downloadNomoduleOutput();
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp visual-diff --nobuild --esm');
     timedExecOrDie('gulp visual-diff --nobuild');
   } else {
-    timedExecOrDie('gulp visual-diff --empty --esm');
     timedExecOrDie('gulp visual-diff --empty');
     printSkipMessage(
       jobName,

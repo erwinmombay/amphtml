@@ -110,6 +110,13 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   'utf8'
 );
 
+/**
+ * @typedef {{
+ *   esm: boolean?
+ * }}
+ */
+const VisualDiffOptionsDef = {};
+
 let browser_;
 let percyAgentProcess_;
 
@@ -736,6 +743,7 @@ async function visualDiff() {
     argv.grep = RegExp(argv.grep);
   }
 
+  await performVisualTests({esm: true});
   await performVisualTests();
   await cleanup_();
   exitCtrlcHandler(handlerProcess);
