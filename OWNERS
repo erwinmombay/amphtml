@@ -9,7 +9,10 @@
     },
     {
       pattern: '**/validator-*.{protoascii,html,out,out.cpponly}',
-      owners: [{name: 'ampproject/wg-caching', required: true}],
+      owners: [
+        {name: 'ampproject/wg-caching', required: true},
+        {name: 'banaag'}
+      ],
     },
     {
       pattern: '**/*.md',
